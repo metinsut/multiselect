@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --border: 0, 0%, 85%;
+    --ring: 215 20.2% 65.1%;
+    --chip: 0, 0%, 93%;
+  }
+}
