@@ -6,8 +6,7 @@ import { HiOutlineDocument } from 'react-icons/hi';
 type Props<T> = {
   options: T[];
   selectedOptions: T[];
-  addItemFromSelectList: (val: T) => void;
-  removeItemFromSelectList: (val: number) => void;
+  updateSelectedOptions: (val: T) => void;
   searchKey: string;
   loading: boolean;
   error: string;
@@ -17,20 +16,11 @@ export function DropDownList<T extends DefaultValues>(props: Props<T>) {
   const {
     options,
     selectedOptions,
-    addItemFromSelectList,
-    removeItemFromSelectList,
+    updateSelectedOptions,
     searchKey,
     loading,
     error,
   } = props;
-
-  const handleUpdate = (item: T, hasSelected: boolean) => {
-    if (hasSelected) {
-      removeItemFromSelectList(item.value);
-    } else {
-      addItemFromSelectList(item);
-    }
-  };
 
   return (
     <div className="flex flex-col max-h-72 overflow-auto border border-solid border-border rounded-md bg-gray-200 mt-1">
@@ -57,7 +47,7 @@ export function DropDownList<T extends DefaultValues>(props: Props<T>) {
             <input
               type="checkbox"
               checked={!!hasSelected}
-              onChange={() => handleUpdate(item, !!hasSelected)}
+              onChange={() => updateSelectedOptions(item)}
             />
             <img src={item.url} className="w-8 h-8 object-cover rounded-md" />
             <div>

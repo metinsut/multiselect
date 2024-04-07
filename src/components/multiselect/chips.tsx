@@ -6,7 +6,7 @@ import { DefaultValues } from '.';
 
 type Props<T> = {
   chipItemsStyle?: string;
-  removeItemFromSelectList: (val: number) => void;
+  updateSelectedOptions: (val: T) => void;
   selectedOptions: T[];
 } & ChipTextProps &
   ComponentProps<'div'>;
@@ -28,7 +28,7 @@ export type ChipTextProps = VariantProps<typeof chipTextVariants>;
 
 export function Chips<T extends DefaultValues>(props: Props<T>) {
   const { size, className } = props;
-  const { chipItemsStyle, removeItemFromSelectList, selectedOptions } = props;
+  const { chipItemsStyle, updateSelectedOptions, selectedOptions } = props;
 
   return (
     <>
@@ -46,7 +46,7 @@ export function Chips<T extends DefaultValues>(props: Props<T>) {
           <AiOutlineClose
             className="cursor-pointer text-gray-400 hover:text-gray-700"
             size="12"
-            onClick={() => removeItemFromSelectList(item.value)}
+            onClick={() => updateSelectedOptions(item)}
           />
         </div>
       ))}

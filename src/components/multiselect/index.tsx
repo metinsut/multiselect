@@ -53,30 +53,24 @@ function MultiSelect<T extends DefaultValues>(props: SelectProps<T>) {
 
   const [focus, setFocus] = useState<boolean>(false);
 
-  const removeItemFromSelectList = useCallback(
-    (removeItem: number) => {
-      onChange((prevList) => {
-        const index = prevList.findIndex((item) => item.value === removeItem);
-        if (index !== -1) {
-          const newList = [...prevList];
-          newList.splice(index, 1);
-          return newList;
-        } else {
-          return prevList;
-        }
-      });
+  const updateSelectedOptions = useCallback(
+    (item: T) => {
+      const index = selectedOptions.indexOf(item);
+      console.log('index', index);
+      console.log('selectedOptions', selectedOptions);
+
+      if (index === -1) {
+        onChange((prevList) => [...prevList, item]);
+      } else {
+        onChange((prevList) =>
+          prevList.filter((listItem) => listItem.value !== item.value)
+        );
+      }
     },
-    [onChange]
+    [selectedOptions, onChange]
   );
 
-  const addItemFromSelectList = useCallback(
-    (addItem: T) => {
-      onChange((prevList) => {
-        return [...prevList, addItem];
-      });
-    },
-    [onChange]
-  );
+  console.log('selectedOptions', selectedOptions);
 
   return (
     <div className={cn('w-full', selectRoot)}>
@@ -84,8 +78,7 @@ function MultiSelect<T extends DefaultValues>(props: SelectProps<T>) {
         node={
           focus && (
             <DropDownList
-              addItemFromSelectList={addItemFromSelectList}
-              removeItemFromSelectList={removeItemFromSelectList}
+              updateSelectedOptions={updateSelectedOptions}
               options={options}
               selectedOptions={selectedOptions}
               searchKey={searchKey}
@@ -109,7 +102,7 @@ function MultiSelect<T extends DefaultValues>(props: SelectProps<T>) {
           <div className={cn('flex gap-1 flex-wrap w-full', inputWrapperStyle)}>
             <Chips
               chipItemsStyle={chipItemsStyle}
-              removeItemFromSelectList={removeItemFromSelectList}
+              updateSelectedOptions={updateSelectedOptions}
               selectedOptions={selectedOptions}
               size={size}
             />
