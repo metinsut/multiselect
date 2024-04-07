@@ -1,27 +1,40 @@
 import { cn } from '../../utils';
 import { Input, InputSelfProps } from './input';
 import { Chips } from './chips';
-import { ChangeEvent, useCallback, useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useState,
+} from 'react';
 import { DropDownList } from './dropDownList';
 import Stick from 'react-stick';
 
-type SelectOptions = { label: string; value: string };
+export type DefaultValues = {
+  value: number;
+  label: string;
+  url: string;
+  subLabel: number;
+} & object;
 
-type SelectProps = {
+type SelectProps<T> = {
   selectRoot?: string;
   inputRootStyle?: string;
   inputWrapperStyle?: string;
   chipItemsStyle?: string;
   inputSelfStyle?: InputSelfProps;
   size?: InputSelfProps['size'];
-  options: SelectOptions[];
-  defaultValues?: SelectOptions[];
-  isLoading?: boolean;
-  isError?: boolean;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  options: T[];
+  selectedOptions: T[];
+  loading: boolean;
+  error: string;
+  onSearch: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange: Dispatch<SetStateAction<T[]>>;
+  searchKey: string;
 };
 
-function MultiSelect(props: SelectProps) {
+function MultiSelect<T extends DefaultValues>(props: SelectProps<T>) {
   const {
     selectRoot,
     inputRootStyle,
@@ -30,18 +43,19 @@ function MultiSelect(props: SelectProps) {
     inputSelfStyle,
     size = 'middle',
     options = [],
-    defaultValues = [],
+    selectedOptions = [],
+    onSearch,
     onChange,
+    searchKey,
+    error,
+    loading,
   } = props;
 
   const [focus, setFocus] = useState<boolean>(false);
-  const [selectedList, setSelectedList] =
-    useState<SelectOptions[]>(defaultValues);
-  const [availableList] = useState<SelectOptions[]>(options);
 
   const removeItemFromSelectList = useCallback(
-    (removeItem: string) => {
-      setSelectedList((prevList) => {
+    (removeItem: number) => {
+      onChange((prevList) => {
         const index = prevList.findIndex((item) => item.value === removeItem);
         if (index !== -1) {
           const newList = [...prevList];
@@ -52,21 +66,17 @@ function MultiSelect(props: SelectProps) {
         }
       });
     },
-    [setSelectedList]
+    [onChange]
   );
 
   const addItemFromSelectList = useCallback(
-    (addItem: SelectOptions) => {
-      setSelectedList((prevList) => {
+    (addItem: T) => {
+      onChange((prevList) => {
         return [...prevList, addItem];
       });
     },
-    [setSelectedList]
+    [onChange]
   );
-
-  console.log('selectedList', selectedList);
-  console.log('availableList', availableList);
-  console.log('focus', focus);
 
   return (
     <div className={cn('w-full', selectRoot)}>
@@ -76,7 +86,11 @@ function MultiSelect(props: SelectProps) {
             <DropDownList
               addItemFromSelectList={addItemFromSelectList}
               removeItemFromSelectList={removeItemFromSelectList}
-              availableList={availableList}
+              options={options}
+              selectedOptions={selectedOptions}
+              searchKey={searchKey}
+              loading={loading}
+              error={error}
             />
           )
         }
@@ -85,7 +99,6 @@ function MultiSelect(props: SelectProps) {
         align="top left"
         autoFlipVertically
         onClickOutside={() => setFocus(false)}
-        component="span"
       >
         <label
           className={cn(
@@ -97,14 +110,14 @@ function MultiSelect(props: SelectProps) {
             <Chips
               chipItemsStyle={chipItemsStyle}
               removeItemFromSelectList={removeItemFromSelectList}
-              selectedList={selectedList}
+              selectedOptions={selectedOptions}
               size={size}
             />
             <Input
               className={cn(inputSelfStyle)}
               size={size}
               setFocus={setFocus}
-              onChange={onChange}
+              onSearch={onSearch}
             />
           </div>
         </label>
@@ -116,4 +129,4 @@ function MultiSelect(props: SelectProps) {
 Input.displayName = 'MultiSelect';
 
 export { MultiSelect };
-export type { SelectProps, SelectOptions };
+export type { SelectProps };

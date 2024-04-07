@@ -1,13 +1,13 @@
 import { AiOutlineClose } from 'react-icons/ai';
 import { cn } from '../../utils';
-import { SelectOptions } from '.';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { ComponentProps } from 'react';
+import { DefaultValues } from '.';
 
-type Props = {
+type Props<T> = {
   chipItemsStyle?: string;
-  removeItemFromSelectList: (val: string) => void;
-  selectedList: SelectOptions[];
+  removeItemFromSelectList: (val: number) => void;
+  selectedOptions: T[];
 } & ChipTextProps &
   ComponentProps<'div'>;
 
@@ -26,13 +26,13 @@ const chipTextVariants = cva('', {
 
 export type ChipTextProps = VariantProps<typeof chipTextVariants>;
 
-export function Chips(props: Props) {
+export function Chips<T extends DefaultValues>(props: Props<T>) {
   const { size, className } = props;
-  const { chipItemsStyle, removeItemFromSelectList, selectedList } = props;
+  const { chipItemsStyle, removeItemFromSelectList, selectedOptions } = props;
 
   return (
     <>
-      {selectedList.map((item, index) => (
+      {selectedOptions.map((item, index) => (
         <div
           key={index}
           className={cn(

@@ -1,66 +1,56 @@
-import { MultiSelect, SelectOptions } from './components/multiselect';
-import { AntSelect } from './components/antdSelect';
+import { MultiSelect } from './components/multiselect';
 import { useQuery } from '@tanstack/react-query';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
+import { ApiResponse, SelectOptions } from './types';
+import { useDebounceCallback } from 'usehooks-ts';
 
 function App() {
-  const options: SelectOptions[] = [];
+  const [hasError, setHasError] = useState('');
+  const [options, setOptions] = useState<SelectOptions[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<SelectOptions[]>([]);
+  const [searchKey, setSearchKey] = useState<string>('');
+  const debouncedSearchKey = useDebounceCallback(setSearchKey, 300);
 
-  for (let i = 10; i < 36; i++) {
-    options.push({
-      label: i.toString(36) + i,
-      value: i.toString(36) + i,
-    });
-  }
-
-  const fetchRickAndMortyChars = async () => {
-    const response = await fetch('https://rickandmortyapi.com/api/character');
-    const data = await response.json();
-    return data;
-  };
-
-  const { data, isError, isLoading } = useQuery({
-    queryKey: ['fetchRickAndMortyChars'],
-    queryFn: fetchRickAndMortyChars,
+  const { data, isFetching } = useQuery<ApiResponse>({
+    queryKey: ['fetchRickAndMortyChars', searchKey],
+    queryFn: async () =>
+      await fetch(
+        `https://rickandmortyapi.com/api/character?name=${searchKey}`
+      ).then((res) => res.json()),
   });
 
-  const handleChange = (value: ChangeEvent<HTMLInputElement>) => {
-    console.log(`selected ${value}`);
-  };
+  useEffect(() => {
+    if (data?.error) {
+      setOptions([]);
+      setHasError(data?.error);
+    } else {
+      setHasError('');
+      setOptions(
+        data?.results?.map((item) => ({
+          value: item.id,
+          label: item.name,
+          url: item.image,
+          subLabel: item.episode.length,
+        })) ?? []
+      );
+    }
+  }, [data]);
 
-  console.log('data', data);
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    debouncedSearchKey(e.target.value);
+  };
 
   return (
     <main className="grid p-12 place-items-center pt-40">
       <MultiSelect
         options={options}
-        defaultValues={[
-          { label: 'a10', value: 'a10' },
-          { label: 'c12', value: 'c12' },
-        ]}
-        size="small"
-        isLoading={isLoading}
-        isError={isError}
-        onChange={handleChange}
+        selectedOptions={selectedOptions}
+        loading={isFetching}
+        error={hasError}
+        onChange={setSelectedOptions}
+        onSearch={handleSearch}
+        searchKey={searchKey}
       />
-      {/* <MultiSelect
-        options={options}
-        defaultValues={[
-          { label: 'a10', value: 'a10' },
-          { label: 'c12', value: 'c12' },
-        ]}
-        size="middle"
-      />
-      <MultiSelect
-        options={options}
-        defaultValues={[
-          { label: 'a10', value: 'a10' },
-          { label: 'c12', value: 'c12' },
-        ]}
-        size="large"
-      /> */}
-      <hr className="w-full h-2 m-12" />
-      <AntSelect />
     </main>
   );
 }

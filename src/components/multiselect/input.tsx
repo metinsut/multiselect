@@ -1,5 +1,4 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import clsx from 'clsx';
 import { cn } from '../../utils';
 import {
   ChangeEvent,
@@ -29,15 +28,12 @@ export type InputSelfProps = VariantProps<typeof inputVariants>;
 
 export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> &
   InputSelfProps & {
-    success?: boolean;
-    error?: boolean;
     setFocus: Dispatch<SetStateAction<boolean>>;
-    onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+    onSearch?: (e: ChangeEvent<HTMLInputElement>) => void;
   };
 
 const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
-  const { className, type, success, error, size, setFocus, onChange, ...rest } =
-    props;
+  const { className, type, size, setFocus, onSearch, ...rest } = props;
 
   const handleFocus = () => {
     setFocus(true);
@@ -46,17 +42,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   return (
     <input
       onFocus={handleFocus}
-      onChange={onChange}
+      onChange={onSearch}
       type={type}
-      className={cn(
-        inputVariants({ size, className }),
-        clsx({
-          ['bg-green-50 border-green-500 text-green-900 focus:ring-green-500 focus:border-green-500']:
-            success,
-          ['bg-red-50 border-red-500 text-red-900 focus:ring-red-500 focus:border-red-500']:
-            error,
-        })
-      )}
+      className={cn(inputVariants({ size, className }))}
       ref={ref}
       {...rest}
     />
